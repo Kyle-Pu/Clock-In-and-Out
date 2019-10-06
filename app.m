@@ -16,26 +16,31 @@ classdef app < matlab.apps.AppBase
 
         % Button pushed function: ClockInOutButton
         function ClockInOutButtonPushed(app, event)
+	    dataCell = readcell('Time_Card.xlsx');
+	    currDate = date; % Take current date and time (below) at the button click for precision
+	    currTime = datestr(now, 'HH:MM:SS');
             global numClicks;
-            global data;
+            %global data;
             numClicks = numClicks + 1;
             
-            command = "cat SignInSheet_* >> SignInSheet.txt";
+            %command = "cat SignInSheet_* >> SignInSheet.txt";
             
             if mod(numClicks, 2) == 1
-                tic;
-                app.Label.Text = datestr(now);
-                writetable(cell2table(cellstr(datestr(now))), 'SignInSheet_2.csv','WriteVariableNames',false);
-                system(command);
+                app.Label.Text = strcat(currDate, " ", currTime);
                 app.Label_2.Text = "Currently clocked in!";
+		dataCell{end + 1, 1} = date;
+		dataCell{end, 2} = currTime; % Sign In Time Column!!! Use the same row as the new date logged!
+                %writetable(cell2table(cellstr(datestr(now))), 'SignInSheet_2.csv','WriteVariableNames',false);
+                %system(command);
             else
-                time = toc;
-                writetable(cell2table(cellstr(datestr(now))), 'SignInSheet_3.csv','WriteVariableNames',false);
-                system(command);
+		app.Label_2.Text = strcat(currDate, " ", currTime);
+		dataCell{end, 3} = currTime; % Same Row as the signing in, but one column over for the Sign OUT column!!!
+		%writetable(cell2table(cellstr(datestr(now))), 'SignInSheet_3.csv','WriteVariableNames',false);
+                %system(command);
                 %writetable(cell2table(cellstr(datestr(now))), "SignInSheet");
-                disp(time);
-                app.Label_2.Text = datestr(now);
             end
+
+	    writetable(cell2table(dataCell), 'Time_Card.xlsx', 'WriteVariableNames', false);
             
         end
 
@@ -44,8 +49,8 @@ classdef app < matlab.apps.AppBase
             value = app.Switch.Value;
             global numClicks;
             numClicks = 0;
-            global data;
-            data = readtable('SignInSheet.txt');
+            %global data;
+            %data = readtable('SignInSheet.txt');
             app.ClockInOutButton.Visible = true;
             app.Switch.Visible = false;
         end
